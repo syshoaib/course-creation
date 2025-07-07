@@ -1,0 +1,234 @@
+<div *ngIf="!allowed" class="access-denied">
+  <mat-card>
+    <h2>Access Denied</h2>
+    <p>You do not have permission to access this page.</p>
+  </mat-card>
+</div>
+
+<form
+  *ngIf="allowed"
+  [formGroup]="courseForm"
+  (ngSubmit)="onSubmit()"
+  class="course-form"
+>
+  <h2>Create New Course</h2>
+  <mat-form-field
+    appearance="outline"
+    class="full-width"
+    [ngClass]="{'error': courseForm.get('title')?.invalid && courseForm.get('title')?.touched}"
+  >
+    <mat-label>Title</mat-label>
+    <input matInput formControlName="title" maxlength="25" />
+    <mat-error *ngIf="courseForm.get('title')?.touched"
+      >{{ getError(courseForm.get('title')!, 'title') }}</mat-error
+    >
+  </mat-form-field>
+
+  <mat-form-field
+    appearance="outline"
+    class="full-width"
+    [ngClass]="{'error': courseForm.get('description')?.invalid && courseForm.get('description')?.touched}"
+  >
+    <mat-label>Description</mat-label>
+    <textarea
+      matInput
+      formControlName="description"
+      maxlength="500"
+      rows="3"
+    ></textarea>
+    <mat-error *ngIf="courseForm.get('description')?.touched"
+      >{{ getError(courseForm.get('description')!, 'description') }}</mat-error
+    >
+  </mat-form-field>
+
+  <mat-form-field
+    appearance="outline"
+    class="full-width"
+    [ngClass]="{'error': courseForm.get('author')?.invalid && courseForm.get('author')?.touched}"
+  >
+    <mat-label>Author</mat-label>
+    <input matInput formControlName="author" maxlength="20" />
+    <mat-error *ngIf="courseForm.get('author')?.touched"
+      >{{ getError(courseForm.get('author')!, 'author') }}</mat-error
+    >
+  </mat-form-field>
+
+  <mat-form-field
+    appearance="outline"
+    class="full-width"
+    [ngClass]="{'error': courseForm.get('price')?.invalid && courseForm.get('price')?.touched}"
+  >
+    <mat-label>Price</mat-label>
+    <input
+      matInput
+      type="number"
+      formControlName="price"
+      min="0.01"
+      step="0.01"
+    />
+    <mat-error *ngIf="courseForm.get('price')?.touched"
+      >{{ getError(courseForm.get('price')!, 'price') }}</mat-error
+    >
+  </mat-form-field>
+
+  <mat-form-field
+    appearance="outline"
+    class="full-width"
+    [ngClass]="{'error': courseForm.get('level')?.invalid && courseForm.get('level')?.touched}"
+  >
+    <mat-label>Level</mat-label>
+    <mat-select formControlName="level">
+      <mat-option *ngFor="let level of levels" [value]="level"
+        >{{ level }}</mat-option
+      >
+    </mat-select>
+    <mat-error *ngIf="courseForm.get('level')?.touched"
+      >{{ getError(courseForm.get('level')!, 'level') }}</mat-error
+    >
+  </mat-form-field>
+
+  <mat-form-field
+    appearance="outline"
+    class="full-width"
+    [ngClass]="{'error': courseForm.get('thumbnailUrl')?.invalid && courseForm.get('thumbnailUrl')?.touched}"
+  >
+    <mat-label>Thumbnail URL</mat-label>
+    <input matInput formControlName="thumbnailUrl" />
+    <mat-error *ngIf="courseForm.get('thumbnailUrl')?.touched"
+      >{{ getError(courseForm.get('thumbnailUrl')!, 'thumbnailUrl')
+      }}</mat-error
+    >
+  </mat-form-field>
+
+  <div formArrayName="modules">
+    <div
+      *ngFor="let module of modules.controls; let i = index"
+      [formGroupName]="i"
+      class="module-section"
+    >
+      <mat-card class="module-card">
+        <div class="module-header">
+          <h3>Module {{ i + 1 }}</h3>
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="removeModule(i)"
+            *ngIf="modules.length > 1"
+            matTooltip="Remove Module"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+          [ngClass]="{'error': module.get('name')?.invalid && module.get('name')?.touched}"
+        >
+          <mat-label>Module Name</mat-label>
+          <input matInput formControlName="name" maxlength="25" />
+          <mat-error *ngIf="module.get('name')?.touched"
+            >{{ getError(module.get('name')!, 'moduleName') }}</mat-error
+          >
+        </mat-form-field>
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+          [ngClass]="{'error': module.get('description')?.invalid && module.get('description')?.touched}"
+        >
+          <mat-label>Module Description</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            maxlength="500"
+            rows="2"
+          ></textarea>
+          <mat-error *ngIf="module.get('description')?.touched"
+            >{{ getError(module.get('description')!, 'moduleDescription')
+            }}</mat-error
+          >
+        </mat-form-field>
+        <div formArrayName="lessons">
+          <div
+            *ngFor="let lesson of lessons(i).controls; let j = index"
+            [formGroupName]="j"
+            class="lesson-section"
+          >
+            <mat-card class="lesson-card">
+              <div class="lesson-header">
+                <h4>Lesson {{ j + 1 }}</h4>
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="removeLesson(i, j)"
+                  *ngIf="lessons(i).length > 1"
+                  matTooltip="Remove Lesson"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+              <mat-form-field
+                appearance="outline"
+                class="full-width"
+                [ngClass]="{'error': lesson.get('title')?.invalid && lesson.get('title')?.touched}"
+              >
+                <mat-label>Lesson Title</mat-label>
+                <input matInput formControlName="title" maxlength="25" />
+                <mat-error *ngIf="lesson.get('title')?.touched"
+                  >{{ getError(lesson.get('title')!, 'lessonTitle')
+                  }}</mat-error
+                >
+              </mat-form-field>
+              <mat-form-field
+                appearance="outline"
+                class="full-width"
+                [ngClass]="{'error': lesson.get('duration')?.invalid && lesson.get('duration')?.touched}"
+              >
+                <mat-label>Lesson Duration (minutes)</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  formControlName="duration"
+                  min="0.01"
+                  step="0.01"
+                />
+                <mat-error *ngIf="lesson.get('duration')?.touched"
+                  >{{ getError(lesson.get('duration')!, 'lessonDuration')
+                  }}</mat-error
+                >
+              </mat-form-field>
+            </mat-card>
+          </div>
+          <button
+            mat-stroked-button
+            color="primary"
+            (click)="addLesson(i)"
+            type="button"
+            class="add-btn"
+          >
+            <mat-icon>add</mat-icon> Add Lesson
+          </button>
+        </div>
+      </mat-card>
+    </div>
+    <button
+      mat-stroked-button
+      color="accent"
+      (click)="addModule()"
+      type="button"
+      class="add-btn"
+    >
+      <mat-icon>add</mat-icon> Add Module
+    </button>
+  </div>
+
+  <div class="form-actions">
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="courseForm.invalid"
+    >
+      Create Course
+    </button>
+  </div>
+</form>
